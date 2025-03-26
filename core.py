@@ -305,12 +305,13 @@ class Core(object):
                                 first_vip_goods_button = tab_chat.ele('@class=arco-tabs-content-inner').children()[1].child().child().children()[
                                     1].child().child().child().child().children()[1].child()
                                 if first_vip_goods_button:
-                                    print('发送商品消息:', first_vip_goods_button.text)
+                                    first_vip_goods_button.click(by_js=None, timeout=60)
+                                    # print('发送商品消息:', first_vip_goods_button.text)
 
                     Utils.delay()
 
                     textarea = tab_chat.ele('@id=im_sdk_chat_input').children()[1]
-                    # textarea.input(self.send_content)
+                    textarea.input(self.send_content)
                     # print('发送内容:' + self.send_content)
                     print('发送')
                     self.save_processed_creator(nickname_text)  # 保存到本地文件
@@ -318,6 +319,8 @@ class Core(object):
                     Utils.delay()
 
                     send_button = tab_chat.ele('@id=im_sdk_chat_input').children()[2].child().children()[1]
+                    if send_button:
+                        send_button.click(by_js=None, timeout=60)
                     # print('发送文本消息:', send_button)
 
                     Utils.delay()
