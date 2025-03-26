@@ -22,16 +22,20 @@ class WorkerThread(QThread):
     finished_signal = Signal()  # 任务完成信号
     error_signal = Signal(str)  # 任务出错信号
 
-    def __init__(self, core, run_count):
+    def __init__(self, core, run_count, keyword, contents):
         super().__init__()
         self.core = core
         self.run_count = run_count
+        self.keyword = keyword
+        self.contents = contents
 
     def run(self):
         """ 在子线程中执行核心任务 """
         print('开始任务')
         try:
             self.core.Set_run_total_count(self.run_count)
+            self.core.Set_search_keyword(self.keyword)
+            self.core.Set_send_content(self.contents)
             self.core.Start()
             self.finished_signal.emit()  # 任务完成后，发送信号
         except Exception as e:
@@ -55,6 +59,10 @@ class TiktokShopWidget(QWidget):
         self.run_count_input = QLineEdit(self)
         self.run_count_input.setPlaceholderText("输入运行次数")
         self.run_count_input.setValidator(QIntValidator(1, 10000, self))  # 仅允许 1-10000 的数字
+
+        self.run_interval_time = QLineEdit(self)
+        self.run_interval_time.setPlaceholderText("输入间隔时间")
+        self.run_interval_time.setValidator(QIntValidator(1, 10000, self))  # 仅允许 1-10000 的数字
 
         # 搜索内容输入框
         self.search_input = QLineEdit(self)
@@ -95,6 +103,9 @@ class TiktokShopWidget(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(QLabel("运行次数:"))
         layout.addWidget(self.run_count_input)
+
+        layout.addWidget(QLabel("间隔时间:"))
+        layout.addWidget(self.run_interval_time)
 
         layout.addWidget(QLabel("搜索内容:"))
         layout.addWidget(self.search_input)
@@ -204,7 +215,7 @@ class TiktokShopWidget(QWidget):
         self.stop_button.setEnabled(True)
 
         # 启动子线程
-        self.worker_thread = WorkerThread(self.core, run_count)
+        self.worker_thread = WorkerThread(self.core, run_count, search_content, message_content)
         self.worker_thread.finished_signal.connect(self.on_task_finished)
         self.worker_thread.error_signal.connect(self.on_task_error)
         self.worker_thread.start()

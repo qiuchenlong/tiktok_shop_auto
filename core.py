@@ -21,8 +21,14 @@ class Core(object):
         Settings.set_language('en')
         # 目标标题（请修改为你要找的标题）
         self.target_title = "TikTok Shop"
+
         # 总运行次数
         self.run_total_count = 0
+        # 搜索的关键字
+        self.search_keyword = ''
+        # 发送的内容
+        self.send_content = ''
+
         # 运行次数
         self.run_count = 0
         # 连接到已打开的浏览器
@@ -33,6 +39,14 @@ class Core(object):
     def Set_run_total_count(self, count):
         """运行总次数"""
         self.run_total_count = count
+
+    def Set_search_keyword(self, search_keyword):
+        """搜索的关键字"""
+        self.search_keyword = search_keyword
+
+    def Set_send_content(self, send_content):
+        """发送的内容"""
+        self.send_content = send_content
 
     def Start(self):
         """开始任务"""
@@ -122,20 +136,21 @@ class Core(object):
                             else:
                                 print(nickname_text)
                                 # find_creators.append(nickname_text)
-                                self.save_processed_creator(nickname_text) # 保存到本地文件
+                                # self.save_processed_creator(nickname_text) # 保存到本地文件
 
                                 # 打开聊天对话框
                                 if len(tds) > 6:
                                     td = tds[6]
+                                    print('打开私聊页面')
                                     message_button = td.child().child().child().children()[1].child()
-                                    message_button.click()
+                                    message_button.click(by_js=None, timeout=60)
+                                    print('打开私聊页面 over')
 
                                     tabs = self.browser.get_tabs()
 
                                     tab_chat = tabs[0]
-                                    # chat_tab(tab_chat, nickname_text)
+                                    self.chat_tab(tab_chat, nickname_text)
 
-                                    Utils.delay(t=10)
                                     if self.target_title in tab_chat.title:
                                         pass
                                     else:
@@ -156,4 +171,148 @@ class Core(object):
         # 保存最新 Cookies
         self.save_cookies(self.browser)
 
+
+    def chat_tab(self, tab_chat, nickname_text):
+        Utils.delay(t=5)
+        chat_flag = True
+        while chat_flag:
+
+            # # index-module__sdkBox--RAScS
+            #
+            # # tab_chat.ele('@text()=No chat selected.')
+            # all = tab_chat.ele('@class=m4b-menu-item-children')
+            # # print(all.text)
+            # match = re.search(r'\d+', all.text)  # 提取数字部分
+            # if match:
+            #     num = int(match.group())
+            #     if num >= 1000:
+            #         # print('可以聊天了')
+            #         chat_flag = False
+            #
+            #         Utils.delay()
+
+            submodule_layout_container_id = tab_chat.ele('@id=submodule_layout_container_id')
+            # No_chat_selected = submodule_layout_container_id.child().child().children()[1].child().child().child().child().children()[1].child().child().child().child().children()[1]
+            No_chat_selected = submodule_layout_container_id.child().child().children()[1].child().child().child().child().children()[
+                1].child().child().children()
+            # print(len(No_chat_selected))
+
+            # if No_chat_selected.text != 'No chat selected.':
+            if len(No_chat_selected) >= 2:
+                Utils.delay(t=5)
+                chat_flag = False
+
+                # workbench-container
+                workbench_container = tab_chat.ele('@id=workbench-container')
+                print('workbench_container=', workbench_container)
+                if workbench_container:
+                    # workbench_nickname = \
+                    # workbench_container.child().children()[1].child().child().child().child().child().children()[1]
+                    # print(workbench_nickname.text)
+
+                    # if workbench_nickname.text == nickname_text:
+                    #     chat_flag = False
+
+                    Utils.delay()
+
+                    print('切换-product_lists')
+                    product_lists = tab_chat.ele('@id=workbench-container').child().child().child().child().child().children()[
+                        1].child().child().child().child()
+                    print("product_lists", product_lists)
+                    print("product_lists", product_lists.text)
+                    if product_lists:
+                        print('悬浮')
+                        product_lists.hover()
+                        print('尝试点击元素...')
+                        try:
+                            product_lists.click(by_js=None, timeout=60)
+                            print("点击成功！")
+                        except Exception as e:
+                            print(f"普通点击失败: {e}")
+                            print("尝试使用 JavaScript 点击...")
+
+                            try:
+                                tab_chat.run_js("arguments[0].click();", product_lists)
+                                print("JavaScript 点击成功！")
+                            except Exception as e2:
+                                print(f"JavaScript 点击失败: {e2}")
+                                print("尝试模拟鼠标事件...")
+
+                                try:
+                                    tab_chat.run_js("""
+                                            arguments[0].dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                                            arguments[0].dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                                            arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                                        """, product_lists)
+                                    print("模拟鼠标事件点击成功！")
+                                except Exception as e3:
+                                    print(f"模拟鼠标事件失败: {e3}")
+                                    print("尝试前置窗口并重新点击...")
+
+                                    try:
+                                        tab_chat.set_window_state('maximized')  # 最大化窗口
+                                        time.sleep(0.5)
+                                        tab_chat.set_window_state('normal')  # 还原窗口
+                                        product_lists.click()
+                                        print("窗口前置后点击成功！")
+                                    except Exception as e4:
+                                        print(f"所有点击方式均失败: {e4}")
+
+                        # tab_chat.run_js("arguments[0].dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));",
+                        #                 product_lists)
+                        # tab_chat.run_js("arguments[0].dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));",
+                        #                 product_lists)
+                        # tab_chat.run_js("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));",
+                        #                 product_lists)
+
+                    # if product_lists:
+                    #     tab_chat.run_js('arguments[0].click();', product_lists)
+
+                    Utils.delay()
+
+                    search_container = tab_chat.ele('@id=workbench-container').child().children()[1].child().children()[1].child()
+                    if search_container:
+
+                        print('输入-搜索关键字')
+
+
+                        search_name_input = tab_chat.ele('@id=workbench-container').child().children()[1].child().children()[1].child().child().child().children()[
+                            1].child().child().child()
+                        if search_name_input:
+                            search_name_input.input(self.search_keyword)
+
+                            Utils.delay()
+
+                            search_name_button = tab_chat.ele('@id=workbench-container').child().children()[1].child().children()[1].child().child().child().children()[
+                                1].child().child().children()[2]
+                            if search_name_button:
+                                search_name_button.click(by_js=None, timeout=60)
+
+                            Utils.delay(t=5)
+
+                            vip_search_results = tab_chat.ele('@class=arco-tabs-content-inner').children()[1].child().child().children()[
+                                1].child().child().children()
+
+                            if len(vip_search_results) > 2:
+                                first_vip_goods_button = tab_chat.ele('@class=arco-tabs-content-inner').children()[1].child().child().children()[
+                                    1].child().child().child().child().children()[1].child()
+                                if first_vip_goods_button:
+                                    print('发送商品消息:', first_vip_goods_button.text)
+
+                    Utils.delay()
+
+                    textarea = tab_chat.ele('@id=im_sdk_chat_input').children()[1]
+                    # textarea.input(self.send_content)
+                    # print('发送内容:' + self.send_content)
+                    print('发送')
+                    self.save_processed_creator(nickname_text)  # 保存到本地文件
+
+                    Utils.delay()
+
+                    send_button = tab_chat.ele('@id=im_sdk_chat_input').children()[2].child().children()[1]
+                    # print('发送文本消息:', send_button)
+
+                    Utils.delay()
+
+            Utils.delay()
 
