@@ -18,14 +18,24 @@ Operation process:
 Top selling bloggers during the event can also unlock mysterious rewards! Looking forward to a win-win spring business opportunity with you! Looking forward to receiving your reply
 '''
 
+from tmp import launch_with_cookies
+
+class InitWorkerThread(QThread):
+    def __init__(self):
+        super().__init__()
+    def run(self):
+        launch_with_cookies()
+
+
 class WorkerThread(QThread):
     finished_signal = Signal()  # 任务完成信号
     error_signal = Signal(str)  # 任务出错信号
 
-    def __init__(self, core, run_count, keyword, contents):
+    def __init__(self, core, run_count, run_interval_time, keyword, contents):
         super().__init__()
         self.core = core
         self.run_count = run_count
+        self.run_interval_time = run_interval_time
         self.keyword = keyword
         self.contents = contents
 
@@ -34,11 +44,13 @@ class WorkerThread(QThread):
         print('开始任务')
         try:
             self.core.Set_run_total_count(self.run_count)
+            self.core.Set_run_interval_time(self.run_interval_time)
             self.core.Set_search_keyword(self.keyword)
             self.core.Set_send_content(self.contents)
             self.core.Start()
             self.finished_signal.emit()  # 任务完成后，发送信号
         except Exception as e:
+            print("e=", e)
             self.error_signal.emit(str(e))  # 任务出错，发送错误信号
 
 class TiktokShopWidget(QWidget):
@@ -52,6 +64,7 @@ class TiktokShopWidget(QWidget):
 
         self.core = Core()
         self.worker_thread = None  # 线程对象
+        self.init_worker_thread = None
         self.timer = QTimer(self)
 
     def init_ui(self):
@@ -60,9 +73,9 @@ class TiktokShopWidget(QWidget):
         self.run_count_input.setPlaceholderText("输入运行次数")
         self.run_count_input.setValidator(QIntValidator(1, 10000, self))  # 仅允许 1-10000 的数字
 
-        self.run_interval_time = QLineEdit(self)
-        self.run_interval_time.setPlaceholderText("输入间隔时间")
-        self.run_interval_time.setValidator(QIntValidator(1, 10000, self))  # 仅允许 1-10000 的数字
+        self.run_interval_time_input = QLineEdit(self)
+        self.run_interval_time_input.setPlaceholderText("输入间隔时间")
+        self.run_interval_time_input.setValidator(QIntValidator(1, 10000, self))  # 仅允许 1-10000 的数字
 
         # 搜索内容输入框
         self.search_input = QLineEdit(self)
@@ -83,6 +96,7 @@ class TiktokShopWidget(QWidget):
         self.time_edit.setEnabled(False)
 
         # 按钮
+        self.init_button = QPushButton("初始化", self)
         self.start_button = QPushButton("开始", self)
         self.stop_button = QPushButton("停止", self)
 
@@ -91,10 +105,11 @@ class TiktokShopWidget(QWidget):
         self.set_status_color("gray")  # 初始状态为灰色
 
         # 日志组件
-        self.log_output = QTextEdit(self)
-        self.log_output.setReadOnly(True)
+        # self.log_output = QTextEdit(self)
+        # self.log_output.setReadOnly(True)
 
         # 绑定按钮事件
+        self.init_button.clicked.connect(self.init_task)
         self.start_button.clicked.connect(self.start_task)
         self.stop_button.clicked.connect(self.stop_task)
         self.immediate_radio.toggled.connect(self.toggle_time_edit)
@@ -105,7 +120,7 @@ class TiktokShopWidget(QWidget):
         layout.addWidget(self.run_count_input)
 
         layout.addWidget(QLabel("间隔时间:"))
-        layout.addWidget(self.run_interval_time)
+        layout.addWidget(self.run_interval_time_input)
 
         layout.addWidget(QLabel("搜索内容:"))
         layout.addWidget(self.search_input)
@@ -127,6 +142,7 @@ class TiktokShopWidget(QWidget):
 
         # 按钮布局
         btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.init_button)
         btn_layout.addWidget(self.start_button)
         btn_layout.addWidget(self.stop_button)
         layout.addLayout(btn_layout)
@@ -134,11 +150,12 @@ class TiktokShopWidget(QWidget):
 
         layout.addWidget(self.status_label)
 
-        layout.addWidget(self.log_output)
+        # layout.addWidget(self.log_output)
 
 
         self.setLayout(layout)
 
+        self.init_button.setEnabled(True)   # 初始化按钮默认可点击
         self.start_button.setEnabled(True)  # 开始按钮默认可点击
         self.stop_button.setEnabled(False)  # 停止按钮默认不可点击
 
@@ -146,9 +163,16 @@ class TiktokShopWidget(QWidget):
         """ 选择 '定时执行' 时启用时间选择框 """
         self.time_edit.setEnabled(self.schedule_radio.isChecked())
 
+    def init_task(self):
+        """ 初始化 """
+        self.init_worker_thread = InitWorkerThread()
+        self.init_worker_thread.start()
+        self.init_button.setEnabled(False)
+
     def start_task(self):
         """ 开始任务 """
         run_count = self.run_count_input.text()
+        run_interval_time = self.run_interval_time_input.text()
         search_content = self.search_input.text()
         message_content = self.message_input.toPlainText()  # 获取多行文本内容
 
@@ -202,20 +226,21 @@ class TiktokShopWidget(QWidget):
     def execute_task(self):
         """ 立即执行任务 """
         run_count = int(self.run_count_input.text())
+        run_interval_time = int(self.run_interval_time_input.text())
         search_content = self.search_input.text()
         message_content = self.message_input.toPlainText()
 
         self.status_label.setText(f"状态: 运行中 ({run_count} 次)")
         self.set_status_color("green")
 
-        print(f"开始运行: {run_count} 次，搜索内容: {search_content}\n发送内容:\n{message_content}")
+        # print(f"开始运行: {run_count} 次，搜索内容: {search_content}\n发送内容:\n{message_content}")
 
         # 禁用按钮
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
 
         # 启动子线程
-        self.worker_thread = WorkerThread(self.core, run_count, search_content, message_content)
+        self.worker_thread = WorkerThread(self.core, run_count, run_interval_time, search_content, message_content)
         self.worker_thread.finished_signal.connect(self.on_task_finished)
         self.worker_thread.error_signal.connect(self.on_task_error)
         self.worker_thread.start()
@@ -267,13 +292,15 @@ class TiktokShopWidget(QWidget):
     def save_settings(self):
         """ 保存用户输入的设置 """
         self.settings.setValue("run_count", self.run_count_input.text())
+        self.settings.setValue("run_interval_time", self.run_interval_time_input.text())
         self.settings.setValue("search_content", self.search_input.text())
         self.settings.setValue("message_content", self.message_input.toPlainText())
         print("设置已保存")
 
     def load_settings(self):
         """ 载入上次保存的设置 """
-        self.run_count_input.setText(self.settings.value("run_count", "10"))
+        self.run_count_input.setText(self.settings.value("run_count", "500"))
+        self.run_interval_time_input.setText(self.settings.value("run_interval_time", "3"))
         self.search_input.setText(self.settings.value("search_content", DEFAULT_SEARCH_CONTENT))
         self.message_input.setText(self.settings.value("message_content", DEFAULT_SEND_CONTENT))
         print("设置已加载")

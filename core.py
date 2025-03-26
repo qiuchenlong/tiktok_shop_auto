@@ -24,6 +24,8 @@ class Core(object):
 
         # 总运行次数
         self.run_total_count = 0
+        # 间隔时间
+        self.run_interval_time = 0
         # 搜索的关键字
         self.search_keyword = ''
         # 发送的内容
@@ -39,6 +41,9 @@ class Core(object):
     def Set_run_total_count(self, count):
         """运行总次数"""
         self.run_total_count = count
+
+    def Set_run_interval_time(self, interval_time):
+        self.run_interval_time = interval_time
 
     def Set_search_keyword(self, search_keyword):
         """搜索的关键字"""
@@ -164,6 +169,9 @@ class Core(object):
                     Utils.delay()
 
                     ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
+
+            # 任务间隔时长
+            Utils.delay(t=self.run_interval_time)
 
 
 

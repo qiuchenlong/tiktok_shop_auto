@@ -8,7 +8,7 @@ def main():
 
     widget = TiktokShopWidget()
     # 设置QWidget的固定大小
-    widget.setFixedSize(650, 750)
+    widget.setFixedSize(650, 550)
     widget.show()
 
     sys.exit(app.exec())
