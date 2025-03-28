@@ -72,62 +72,64 @@ def launch_with_cookies():
 
     time.sleep(3000000)
 
-
-    count = 0
     while True:
-    # if True:
+        print('')
 
-        # 获取 class 为 'arco-table-body' 的元素
-        table_body = tab.ele('@class=arco-table-body')
-        if table_body:
-            table = table_body.child('tag:table')
-            tbody = table.children()[1] if len(table.children()) >= 2 else None
-
-            if tbody:
-                trs = tbody.children()
-                print('个数:', len(trs))
-                for i in range(len(trs) // 2):
-                    tr = trs[i * 2]
-                    tds = tr.children()
-
-                    if len(tds) > 1:
-                        td = tds[0]
-                        nickname = td.child().child().child().children()[1].child().child().child()
-                        nickname_text = nickname.text
-                        if nickname_text in find_creators:
-                            pass
-                        else:
-                            print(nickname_text)
-                            find_creators.append(nickname.text)
-
-
-                            # 打开聊天对话框
-                            if len(tds) > 6:
-                                td = tds[6]
-                                message_button = td.child().child().child().children()[1].child()
-                                message_button.click()
-
-
-                                tabs = browser.get_tabs()
-
-
-                                tab_chat = tabs[0]
-                                chat_tab(tab_chat)
-
-
-
-                                time.sleep(30)
-
-
-                                browser.close_tabs(tab_chat)
-                                time.sleep(3)
-
-                count += 1
-                print(count)
-
-                # 页面向下滚动 50 像素
-                time.sleep(3)
-                ac.move_to(ele_or_loc=table_body, offset_y=count * 50).scroll(delta_y=50)
+    # count = 0
+    # while True:
+    # # if True:
+    #
+    #     # 获取 class 为 'arco-table-body' 的元素
+    #     table_body = tab.ele('@class=arco-table-body')
+    #     if table_body:
+    #         table = table_body.child('tag:table')
+    #         tbody = table.children()[1] if len(table.children()) >= 2 else None
+    #
+    #         if tbody:
+    #             trs = tbody.children()
+    #             print('个数:', len(trs))
+    #             for i in range(len(trs) // 2):
+    #                 tr = trs[i * 2]
+    #                 tds = tr.children()
+    #
+    #                 if len(tds) > 1:
+    #                     td = tds[0]
+    #                     nickname = td.child().child().child().children()[1].child().child().child()
+    #                     nickname_text = nickname.text
+    #                     if nickname_text in find_creators:
+    #                         pass
+    #                     else:
+    #                         print(nickname_text)
+    #                         find_creators.append(nickname.text)
+    #
+    #
+    #                         # 打开聊天对话框
+    #                         if len(tds) > 6:
+    #                             td = tds[6]
+    #                             message_button = td.child().child().child().children()[1].child()
+    #                             message_button.click()
+    #
+    #
+    #                             tabs = browser.get_tabs()
+    #
+    #
+    #                             tab_chat = tabs[0]
+    #                             chat_tab(tab_chat)
+    #
+    #
+    #
+    #                             time.sleep(30)
+    #
+    #
+    #                             browser.close_tabs(tab_chat)
+    #                             time.sleep(3)
+    #
+    #             count += 1
+    #             print(count)
+    #
+    #             # 页面向下滚动 50 像素
+    #             time.sleep(3)
+    #             ac.move_to(ele_or_loc=table_body, offset_y=count * 50).scroll(delta_y=50)
 
 
 
