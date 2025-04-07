@@ -122,57 +122,101 @@ class Core(object):
 
         self.run_count = 0
         while True:
-            # 获取 class 为 'arco-table-body' 的元素
-            table_body = tab.ele('@class=arco-table-body')
-            if table_body:
-                table = table_body.child('tag:table')
-                tbody = table.children()[1] if len(table.children()) >= 2 else None
-                if tbody:
-                    trs = tbody.children()
-                    for i in range(len(trs) // 2):
-                        tr = trs[i * 2]
-                        tds = tr.children()
+            try:
+                # 每跑 20 次任务就刷新一次页面
+                if self.run_count > 0 and self.run_count % 20 == 0:
+                    print(f'第 {self.run_count} 次执行，刷新页面以防止异常')
+                    tab.refresh()
+                    Utils.delay(t=2)  # 等待页面重新加载
 
-                        if len(tds) > 1:
-                            td = tds[0]
-                            nickname = td.child().child().child().children()[1].child().child().child()
-                            nickname_text = nickname.text
-                            if nickname_text in self.find_creators:
-                                pass
-                            else:
-                                print(nickname_text)
-                                # find_creators.append(nickname_text)
-                                # self.save_processed_creator(nickname_text) # 保存到本地文件
 
-                                # 打开聊天对话框
-                                if len(tds) > 6:
-                                    td = tds[6]
-                                    print('打开私聊页面')
-                                    message_button = td.child().child().child().children()[1].child()
-                                    message_button.click(by_js=None, timeout=60)
-                                    print('打开私聊页面 over')
+                Utils.delay(t=9)
 
-                                    tabs = self.browser.get_tabs()
+                # 筛选条件
+                print('筛选条件')
+                submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
+                submodule_layout_container_id.child().children()[1].child().child().child().children()[1].child().child().children()[1].child().children()[2].children()[1].click()
 
-                                    tab_chat = tabs[0]
-                                    self.chat_tab(tab_chat, nickname_text)
+                Utils.delay()
 
-                                    if self.target_title in tab_chat.title:
-                                        pass
-                                    else:
-                                        self.browser.close_tabs(tab_chat)
-                                        Utils.delay()
+                print('Items sold')
+                itemSold = tab.ele('@id=unitsSold').child().child().child()
+                itemSold.click()
 
-                    self.run_count += 1
-                    # print(self.run_count)
+                Utils.delay()
 
-                    # 页面向下滚动 50 像素
-                    Utils.delay()
+                print('Items sold item')
+                unitsSold = tab.ele('@id=arco-select-popup-7')
+                unitsSold.child().child().children()[3].click()
 
-                    ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
 
-            # 任务间隔时长
-            Utils.delay(t=self.run_interval_time)
+                Utils.delay(t=5)
+
+                submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
+                submodule_layout_container_id.child().children()[1].child().child().child().children()[
+                    1].child().child().children()[1].child().children()[2].children()[1].click()
+
+                Utils.delay()
+
+
+                # 获取 class 为 'arco-table-body' 的元素
+                table_body = tab.ele('@class=arco-table-body')
+                if table_body:
+                    table = table_body.child('tag:table')
+                    tbody = table.children()[1] if len(table.children()) >= 2 else None
+                    if tbody:
+                        trs = tbody.children()
+                        for i in range(len(trs) // 2):
+                            tr = trs[i * 2]
+                            tds = tr.children()
+
+                            if len(tds) > 1:
+                                td = tds[0]
+                                nickname = td.child().child().child().children()[1].child().child().child()
+                                nickname_text = nickname.text
+                                if nickname_text in self.find_creators:
+                                    pass
+                                else:
+                                    print(nickname_text)
+                                    # find_creators.append(nickname_text)
+                                    # self.save_processed_creator(nickname_text) # 保存到本地文件
+
+                                    # 打开聊天对话框
+                                    if len(tds) > 6:
+                                        td = tds[6]
+                                        print('打开私聊页面')
+                                        message_button = td.child().child().child().children()[1].child()
+                                        message_button.click(by_js=None, timeout=60)
+                                        print('打开私聊页面 over')
+
+                                        tabs = self.browser.get_tabs()
+
+                                        tab_chat = tabs[0]
+                                        # 打开私聊窗口
+                                        self.chat_tab(tab_chat, nickname_text)
+                                        # Utils.delay(t=5)
+
+                                        if self.target_title in tab_chat.title:
+                                            pass
+                                        else:
+                                            self.browser.close_tabs(tab_chat)
+                                            Utils.delay()
+
+                        self.run_count += 1
+                        # print(self.run_count)
+
+                        # 页面向下滚动 50 像素
+                        Utils.delay()
+
+                        ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
+
+                # 任务间隔时长
+                Utils.delay(t=self.run_interval_time)
+
+            except Exception as e:
+                print(f'发生异常: {e}，刷新页面')
+                tab.refresh()
+                Utils.delay(t=2)
 
 
 
