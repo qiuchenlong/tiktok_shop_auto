@@ -195,6 +195,7 @@ class Core(object):
                                         # 打开私聊窗口
                                         self.chat_tab(tab_chat, nickname_text)
                                         # Utils.delay(t=5)
+                                        self.run_count += 1
 
                                         if self.target_title in tab_chat.title:
                                             pass
@@ -202,7 +203,7 @@ class Core(object):
                                             self.browser.close_tabs(tab_chat)
                                             Utils.delay()
 
-                        self.run_count += 1
+                        # self.run_count += 1
                         # print(self.run_count)
 
                         # 页面向下滚动 50 像素
@@ -394,6 +395,7 @@ class Core(object):
 
             except Exception as ex:
                 print('ex:' + ex)
+                self.browser.close_tabs(tab_chat)
 
 
             Utils.delay()
