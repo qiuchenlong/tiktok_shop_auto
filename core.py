@@ -228,7 +228,7 @@ class Core(object):
                         # ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
                         # ac.move_to(ele_or_loc=table, offset_y=table.rect.size[1] - 500).scroll(delta_y=500)
                         # ac.move_to(ele_or_loc=tbody, offset_y=scroll_count * 500).scroll(delta_y=500)
-                        ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=1000-tbody.rect.location[1]).scroll(delta_y=300)
+                        ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=1500-tbody.rect.location[1]).scroll(delta_y=300)
                         # ac.scroll(on_ele=arco_table_content_scroll, delta_y=100)
                         # table.run_js('this.scrollTop += 500')
 
