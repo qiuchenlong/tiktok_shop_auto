@@ -126,37 +126,38 @@ class Core(object):
                 # 每跑 20 次任务就刷新一次页面
                 if self.run_count > 0 and self.run_count % 20 == 0:
                     print(f'第 {self.run_count} 次执行，刷新页面以防止异常')
+                    self.run_count = 0
                     tab.refresh()
                     Utils.delay(t=2)  # 等待页面重新加载
 
 
                 Utils.delay(t=9)
 
-                # 筛选条件
-                print('筛选条件')
-                submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
-                submodule_layout_container_id.child().children()[1].child().child().child().children()[1].child().child().children()[1].child().children()[2].children()[1].click()
-
-                Utils.delay()
-
-                print('Items sold')
-                itemSold = tab.ele('@id=unitsSold').child().child().child()
-                itemSold.click()
-
-                Utils.delay()
-
-                print('Items sold item')
-                unitsSold = tab.ele('@id=arco-select-popup-7')
-                unitsSold.child().child().children()[3].click()
-
-
-                Utils.delay(t=5)
-
-                submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
-                submodule_layout_container_id.child().children()[1].child().child().child().children()[
-                    1].child().child().children()[1].child().children()[2].children()[1].click()
-
-                Utils.delay()
+                # # 筛选条件
+                # print('筛选条件')
+                # submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
+                # submodule_layout_container_id.child().children()[1].child().child().child().children()[1].child().child().children()[1].child().children()[2].children()[1].click()
+                #
+                # Utils.delay()
+                #
+                # print('Items sold')
+                # itemSold = tab.ele('@id=unitsSold').child().child().child()
+                # itemSold.click()
+                #
+                # Utils.delay()
+                #
+                # print('Items sold item')
+                # unitsSold = tab.ele('@id=arco-select-popup-7')
+                # unitsSold.child().child().children()[3].click()
+                #
+                #
+                # Utils.delay(t=5)
+                #
+                # submodule_layout_container_id = tab.ele('@id=submodule_layout_container_id')
+                # submodule_layout_container_id.child().children()[1].child().child().child().children()[
+                #     1].child().child().children()[1].child().children()[2].children()[1].click()
+                #
+                # Utils.delay()
 
 
                 # 获取 class 为 'arco-table-body' 的元素
@@ -216,6 +217,7 @@ class Core(object):
 
             except Exception as e:
                 print(f'发生异常: {e}，刷新页面')
+                self.run_count = 0
                 tab.refresh()
                 Utils.delay(t=2)
 
