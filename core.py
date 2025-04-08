@@ -120,18 +120,18 @@ class Core(object):
 
         Utils.delay()
 
+        scroll_count = 0
         self.run_count = 0
         while True:
             try:
                 # 每跑 20 次任务就刷新一次页面
                 if self.run_count > 0 and self.run_count % 20 == 0:
                     print(f'第 {self.run_count} 次执行，刷新页面以防止异常')
-                    self.run_count = 0
                     tab.refresh()
                     Utils.delay(t=2)  # 等待页面重新加载
 
 
-                Utils.delay(t=9)
+                Utils.delay(t=3)
 
                 # # 筛选条件
                 # print('筛选条件')
@@ -159,7 +159,7 @@ class Core(object):
                 #
                 # Utils.delay()
 
-
+                arco_table_content_scroll = tab.ele('@class=arco-table-content-scroll')
                 # 获取 class 为 'arco-table-body' 的元素
                 table_body = tab.ele('@class=arco-table-body')
                 if table_body:
@@ -176,6 +176,7 @@ class Core(object):
                                 nickname = td.child().child().child().children()[1].child().child().child()
                                 nickname_text = nickname.text
                                 if nickname_text in self.find_creators:
+                                    print('跳过处理')
                                     pass
                                 else:
                                     print(nickname_text)
@@ -193,8 +194,15 @@ class Core(object):
                                         tabs = self.browser.get_tabs()
 
                                         tab_chat = tabs[0]
+                                        print('打开私聊窗口')
                                         # 打开私聊窗口
-                                        self.chat_tab(tab_chat, nickname_text)
+
+                                        try:
+                                            self.chat_tab(tab_chat, nickname_text)
+                                        except Exception as e:
+                                            print(f'发生异常: {e}，关闭页面')
+                                            self.browser.close_tabs(tab_chat)
+
                                         # Utils.delay(t=5)
                                         self.run_count += 1
 
@@ -204,20 +212,32 @@ class Core(object):
                                             self.browser.close_tabs(tab_chat)
                                             Utils.delay()
 
+                        scroll_count += 1
                         # self.run_count += 1
                         # print(self.run_count)
 
                         # 页面向下滚动 50 像素
                         Utils.delay()
 
-                        ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
+                        # print('===', tbody.rect.size[1] - 500)
+                        #
+                        # print('size=', tbody.rect.size)
+                        # print('location=', tbody.rect.location)
+                        # print('midpoint=', tbody.rect.midpoint)
+
+                        # ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
+                        # ac.move_to(ele_or_loc=table, offset_y=table.rect.size[1] - 500).scroll(delta_y=500)
+                        # ac.move_to(ele_or_loc=tbody, offset_y=scroll_count * 500).scroll(delta_y=500)
+                        ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=500-tbody.rect.location[1]).scroll(delta_y=300)
+                        # ac.scroll(on_ele=arco_table_content_scroll, delta_y=100)
+                        # table.run_js('this.scrollTop += 500')
+
 
                 # 任务间隔时长
                 Utils.delay(t=self.run_interval_time)
 
             except Exception as e:
                 print(f'发生异常: {e}，刷新页面')
-                self.run_count = 0
                 tab.refresh()
                 Utils.delay(t=2)
 
