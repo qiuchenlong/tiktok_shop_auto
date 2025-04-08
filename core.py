@@ -219,18 +219,29 @@ class Core(object):
                         # 页面向下滚动 50 像素
                         Utils.delay()
 
-                        print('===', tbody.rect.size[1] - 500)
-
-                        print('size=', tbody.rect.size, arco_table_content_scroll.rect.size)
-                        print('location=', tbody.rect.location, arco_table_content_scroll.rect.location)
-                        print('midpoint=', tbody.rect.midpoint, arco_table_content_scroll.rect.midpoint)
+                        # print('===', tbody.rect.size[1] - 500)
+                        #
+                        # print('size=', tbody.rect.size, arco_table_content_scroll.rect.size)
+                        # print('location=', tbody.rect.location, arco_table_content_scroll.rect.location)
+                        # print('midpoint=', tbody.rect.midpoint, arco_table_content_scroll.rect.midpoint)
+                        # print('midpoint=', tbody.rect.midpoint, arco_table_content_scroll.rect.viewport_corners)
 
                         # ac.move_to(ele_or_loc=table_body, offset_y=self.run_count * 50).scroll(delta_y=50)
                         # ac.move_to(ele_or_loc=table, offset_y=table.rect.size[1] - 500).scroll(delta_y=500)
                         # ac.move_to(ele_or_loc=tbody, offset_y=scroll_count * 500).scroll(delta_y=500)
-                        ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=800-tbody.rect.location[1]).scroll(delta_y=500)
+                        # ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=(tbody.rect.size[1] - tbody.rect.midpoint[1] + tbody.rect.location[1])).scroll(delta_y=1500)
                         # ac.scroll(on_ele=arco_table_content_scroll, delta_y=100)
                         # table.run_js('this.scrollTop += 500')
+                        offset_y = abs(tbody.rect.location[1]) + 300
+                        # print('-----', len(trs), 121*(len(trs)/2-10), offset_y)
+
+                        # ss = tab.ele('@id=submodule_layout_container_id').child().children()[3].child()
+                        # info = ss.run_js('return {sh:this.scrollHeight, ch:this.clientHeight}')
+                        # print('info=', info)
+                        # print(ss.run_js('return this.scrollTop'))  # 滚动后
+                        # ss.run_js('this.scrollTop = this.scrollHeight')
+
+                        ac.move_to(ele_or_loc=arco_table_content_scroll, offset_y=offset_y).scroll(delta_y=1500)
 
 
                 # 任务间隔时长
