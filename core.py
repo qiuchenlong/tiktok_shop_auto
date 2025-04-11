@@ -125,8 +125,9 @@ class Core(object):
         while True:
             try:
                 # 每跑 20 次任务就刷新一次页面
-                if self.run_count > 0 and self.run_count % 20 == 0:
+                if self.run_count > 0 and self.run_count % 35 == 0:
                     print(f'第 {self.run_count} 次执行，刷新页面以防止异常')
+                    self.run_count = 0
                     tab.refresh()
                     Utils.delay(t=2)  # 等待页面重新加载
 
