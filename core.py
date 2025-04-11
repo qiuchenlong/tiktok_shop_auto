@@ -250,6 +250,7 @@ class Core(object):
 
             except Exception as e:
                 print(f'发生异常: {e}，刷新页面')
+                self.run_count = 0
                 tab.refresh()
                 Utils.delay(t=2)
 
