@@ -405,7 +405,9 @@ class Core(object):
                                     first_vip_goods_button = tab_chat.ele('@class=arco-tabs-content-inner').children()[1].child().child().children()[
                                         1].child().child().child().child().children()[1].child()
                                     if first_vip_goods_button:
-                                        first_vip_goods_button.click(by_js=None, timeout=60)
+                                        first_vip_goods_button.hover()
+                                        first_vip_goods_button.click()
+                                        # first_vip_goods_button.click(by_js=None, timeout=60)
                                         # print('发送商品消息:', first_vip_goods_button.text)
 
                         Utils.delay()
